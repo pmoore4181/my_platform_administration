@@ -1,0 +1,79 @@
+version: 2.1
+
+commands:
+  install-tofu:
+    parameters:
+      version:
+        type: string
+        default: "1.10.0"   # pin to the OpenTofu version you use locally
+    steps:
+      - run:
+          name: Install OpenTofu << parameters.version >>
+          command: |
+            curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+            chmod +x install-opentofu.sh
+            sudo ./install-opentofu.sh --install-method standalone --opentofu-version << parameters.version >>
+            rm install-opentofu.sh
+            tofu version
+
+jobs:
+  tofu-plan:
+    docker:
+      - image: cimg/base:stable
+    environment:
+      TF_IN_AUTOMATION: "true"
+    steps:
+      - checkout
+      - install-tofu
+      - run: tofu fmt -check -recursive
+      - run: tofu init -input=false
+      - run: tofu validate
+      - run: tofu plan -input=false -out=tfplan
+      - persist_to_workspace:
+          root: .
+          paths:
+            - tfplan
+
+  tofu-apply:
+    docker:
+      - image: cimg/base:stable
+    environment:
+      TF_IN_AUTOMATION: "true"
+    steps:
+      - checkout
+      - install-tofu
+      - attach_workspace:
+          at: .
+      - run: tofu init -input=false
+      - run: tofu apply -input=false tfplan
+
+workflows:
+  preview:
+    jobs:
+      - tofu-plan:
+          context: PLATFORM_ADMIN
+          filters: &on-push-main
+            branches:
+              only: main
+            tags:
+              ignore: /.*/
+
+  update:
+    jobs:
+      - tofu-plan:
+          context: PLATFORM_ADMIN
+          filters: &on-tag-main
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+      - approvegithubchanges:
+          type: approval
+          requires:
+            - tofu-plan
+          filters: *on-tag-main
+      - tofu-apply:
+          context: PLATFORM_ADMIN
+          requires:
+            - approvegithubchanges
+          filters: *on-tag-main
