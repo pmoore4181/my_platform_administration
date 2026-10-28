@@ -3,4 +3,8 @@
 
 # To Do
 - Utilize key vault to store sensitive data and pull at Plan?/Build?/Run?
-- Test CircleCI capabilities
+- Figure out CirlceCI
+    - Remote State Backend required
+        - Gitlab-managed state?
+        - S3-comapatible storage? cloudflare r2? backblaze b2?
+        - managed platforms? spacelift? env0? Scalr?

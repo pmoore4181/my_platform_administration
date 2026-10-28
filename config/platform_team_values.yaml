@@ -1,5 +1,4 @@
 github_repositories:
-  # Chapter 1 Repos
   - name: platform-team-admin
     description: Repository to manage platform team membership and admin artifacts
     visibility: public
