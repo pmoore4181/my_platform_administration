@@ -1,15 +1,18 @@
 github_repositories:
-  - name: platform-team-admin
+  - name: platform_team_admin
     description: Repository to manage platform team membership and admin artifacts
     visibility: public
-  - name: platform-demo-apps
+  - name: platform_demo_apps
     description: Demo application for testing the platform
     visibility: public
-  - name: platform-core
+  - name: platform_core
     description: Core platform runtime
     visibility: public
-  - name: platform-extensions
+  - name: platform_extensions
     description: Platform extension modules and plugins
+    visibility: public
+  - name: platform_gitops
+    description: Use Flux to manage deployments
     visibility: public
 
 github_organization_members:
